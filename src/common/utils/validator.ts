@@ -1,4 +1,4 @@
-import { Configuration } from '../../configurations/entities/configuration.entity';
+import { Configuration } from '../../configurations/models/configuration.model';
 import { IInfuraTransaction } from '../interfaces/infura-transaction.interface';
 import { convertFromWeiHexToEth } from './helpers';
 
@@ -23,4 +23,6 @@ export function validateTransaction(
     convertFromWeiHexToEth(transaction.value) < configuration.value
   )
     return false;
+
+  return true;
 }

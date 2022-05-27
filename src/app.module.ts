@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { ConfigModule } from '@nestjs/config';
+import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigurationsModule } from './configurations/configuration.module';
 import { InfuraModule } from './infura/infura.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import options from './config/mikro-orm.config';
+import options from './config/sequelize.config';
 
 @Module({
   imports: [
-    MikroOrmModule.forRootAsync({
+    ConfigModule.forRoot(),
+    SequelizeModule.forRootAsync({
       useFactory: () => options,
     }),
-    ConfigModule.forRoot(),
     EventEmitterModule.forRoot(),
     ConfigurationsModule,
     InfuraModule,

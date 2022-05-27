@@ -1,26 +1,31 @@
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
-import { Transaction } from '../entities/transaction.entity';
+import { Transaction } from '../entities/transaction.model';
 import { IInfuraTransaction } from '../../common/interfaces/infura-transaction.interface';
+import { InjectModel } from '@nestjs/sequelize';
+import { convertFromWeiHexToEth } from '../../common/utils/helpers';
 
 @Injectable()
 export class TransactionsService {
   constructor(
-    @InjectRepository(Transaction)
-    private readonly transactionsRepo: EntityRepository<Transaction>,
+    @InjectModel(Transaction)
+    private readonly transactionModel: typeof Transaction,
   ) {}
 
   public async bulkCreate(
     transactions: IInfuraTransaction[],
     configurationId: number,
   ): Promise<void> {
-    const createdTransactions = transactions.map((t) =>
-      this.transactionsRepo.create(
-        plainToClass(Transaction, { ...t, configurationId }),
-      ),
-    );
-    await this.transactionsRepo.persistAndFlush(createdTransactions);
+    try {
+      transactions.map((t) => {
+        console.log({ ...t, configurationId });
+        return this.transactionModel.create({
+          ...t,
+          configurationId,
+          value: convertFromWeiHexToEth(t.value),
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }
 }

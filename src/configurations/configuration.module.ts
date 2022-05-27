@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { Configuration } from './entities/configuration.entity';
+import { Configuration } from './models/configuration.model';
 import { ConfigurationController } from './configuration.controller';
 import { ConfigurationsService } from './configuration.service';
+import { SequelizeModule } from '@nestjs/sequelize';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Configuration])],
+  imports: [SequelizeModule.forFeature([Configuration])],
   controllers: [ConfigurationController],
   providers: [ConfigurationsService],
-  exports: [ConfigurationsService, MikroOrmModule.forFeature([Configuration])],
+  exports: [ConfigurationsService],
 })
 export class ConfigurationsModule {}

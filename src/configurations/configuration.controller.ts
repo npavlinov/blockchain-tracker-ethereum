@@ -20,9 +20,11 @@ export class ConfigurationController {
   ) {}
 
   @Post()
-  create(@Body() createNoteDto: CreateConfigurationDto) {
-    const configuration = this.configurationsService.create(createNoteDto);
-    this.eventEmitter.emit('configuration', configuration);
+  async create(@Body() createNoteDto: CreateConfigurationDto) {
+    const configuration = await this.configurationsService.create(
+      createNoteDto,
+    );
+    this.eventEmitter.emit('configuration', configuration.toJSON());
     return configuration;
   }
 
@@ -33,7 +35,7 @@ export class ConfigurationController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.configurationsService.findByIdOrFail(+id);
+    return this.configurationsService.findOne(+id);
   }
 
   @Patch(':id')

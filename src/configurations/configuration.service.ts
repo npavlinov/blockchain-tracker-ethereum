@@ -1,64 +1,59 @@
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityRepository } from '@mikro-orm/postgresql';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateConfigurationDto } from './dto/create-configuration.dto';
-import { Configuration } from './entities/configuration.entity';
-import { plainToClass } from 'class-transformer';
+import { Configuration } from './models/configuration.model';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
-import { wrap } from '@mikro-orm/core';
+import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 export class ConfigurationsService {
   constructor(
-    @InjectRepository(Configuration)
-    private readonly configurationsRepo: EntityRepository<Configuration>,
+    @InjectModel(Configuration)
+    private readonly configurationModel: typeof Configuration,
   ) {}
 
   public async create(
     createConfigurationDto: CreateConfigurationDto,
   ): Promise<Configuration> {
-    const configuration: Configuration = this.configurationsRepo.create(
-      plainToClass(Configuration, createConfigurationDto),
-    );
-    await this.configurationsRepo.persistAndFlush(configuration);
-    return configuration;
+    return this.configurationModel.create<Configuration>({
+      ...createConfigurationDto,
+    });
   }
 
-  public async findByIdOrFail(id: number): Promise<Configuration> {
-    const configuration: Configuration | null =
-      await this.configurationsRepo.findOne(id);
-    if (!configuration) {
-      throw new NotFoundException('Configuration not found');
-    }
-    return configuration;
+  public async findOne(id: number): Promise<Configuration> {
+    return this.configurationModel.findOne({
+      where: {
+        id,
+      },
+    });
   }
 
   public async findAll(): Promise<Configuration[]> {
-    return this.configurationsRepo.findAll();
+    return this.configurationModel.findAll();
   }
 
+  /**
+   * Function to get the last configuration in order to load it on restart
+   * @returns last configuration
+   */
   public async findLast(): Promise<Configuration[]> {
-    return await this.configurationsRepo.findAll({
+    return await this.configurationModel.findAll({
       limit: 1,
-      orderBy: { createdAt: -1 },
+      order: [['createdAt', 'DESC']],
+      raw: true,
     });
   }
 
   public async update(
     id: number,
     UpdateConfigurationDto: UpdateConfigurationDto,
-  ): Promise<void> {
-    const configuration: Configuration =
-      await this.configurationsRepo.findOneOrFail(id);
-    wrap(configuration).assign(UpdateConfigurationDto);
-    await this.configurationsRepo.flush();
+  ) {
+    return this.configurationModel.update(UpdateConfigurationDto, {
+      where: { id },
+    });
   }
 
   public async remove(id: number) {
-    const configuration: Configuration | null =
-      await this.configurationsRepo.findOne(id);
-    if (configuration) {
-      await this.configurationsRepo.removeAndFlush(configuration);
-    }
+    const configuration = await this.findOne(id);
+    await configuration.destroy();
   }
 }
