@@ -8,6 +8,9 @@ import {
 } from 'sequelize-typescript';
 import { Transaction } from '../../infura/entities/transaction.model';
 
+/**
+ * Configuration for filtering transactions, can be extended with more fields
+ * */
 @Table
 export class Configuration extends Model {
   @AllowNull

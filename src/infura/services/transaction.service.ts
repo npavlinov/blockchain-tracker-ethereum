@@ -15,17 +15,12 @@ export class TransactionsService {
     transactions: IInfuraTransaction[],
     configurationId: number,
   ): Promise<void> {
-    try {
-      transactions.map((t) => {
-        console.log({ ...t, configurationId });
-        return this.transactionModel.create({
-          ...t,
-          configurationId,
-          value: convertFromWeiHexToEth(t.value),
-        });
+    transactions.map((t) => {
+      return this.transactionModel.create({
+        ...t,
+        configurationId,
+        value: convertFromWeiHexToEth(t.value),
       });
-    } catch (err) {
-      console.log(err);
-    }
+    });
   }
 }
