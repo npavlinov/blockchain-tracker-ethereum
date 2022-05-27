@@ -76,6 +76,7 @@ export class InfuraService implements OnApplicationBootstrap {
   // Event sent by configurations controller when a new configuration is created in order to use the new one
   @OnEvent('configuration')
   handleConfigurationCreatedEvent(event: Configuration) {
+    this.logger.debug('received new configuration');
     this.configuration = event;
   }
 
